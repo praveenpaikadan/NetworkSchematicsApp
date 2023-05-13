@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/NetworkSchematicsApp/static/css/main.0a15e7b0.css",
+    "main.js": "/NetworkSchematicsApp/static/js/main.d832c06a.js",
+    "static/js/703.ac552e0b.chunk.js": "/NetworkSchematicsApp/static/js/703.ac552e0b.chunk.js",
+    "static/js/628.95410ebb.chunk.js": "/NetworkSchematicsApp/static/js/628.95410ebb.chunk.js",
+    "static/js/787.e76f8acc.chunk.js": "/NetworkSchematicsApp/static/js/787.e76f8acc.chunk.js",
+    "static/media/logo.svg": "/NetworkSchematicsApp/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/NetworkSchematicsApp/index.html",
+    "main.0a15e7b0.css.map": "/NetworkSchematicsApp/static/css/main.0a15e7b0.css.map",
+    "main.d832c06a.js.map": "/NetworkSchematicsApp/static/js/main.d832c06a.js.map",
+    "703.ac552e0b.chunk.js.map": "/NetworkSchematicsApp/static/js/703.ac552e0b.chunk.js.map",
+    "628.95410ebb.chunk.js.map": "/NetworkSchematicsApp/static/js/628.95410ebb.chunk.js.map",
+    "787.e76f8acc.chunk.js.map": "/NetworkSchematicsApp/static/js/787.e76f8acc.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0a15e7b0.css",
+    "static/js/main.d832c06a.js"
+  ]
+}
