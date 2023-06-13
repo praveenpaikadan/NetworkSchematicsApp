@@ -1,30 +1,48 @@
 import React from 'react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { Panel, useReactFlow, getRectOfNodes, getTransformForBounds } from 'reactflow';
+import { toPng } from 'html-to-image';
 
-function Schematics() {
-  const generatePDF = () => {
-    // Get the HTML content you want to convert to PDF
-    const htmlContent = document.getElementById('diagram');
 
-    // Create a new jsPDF instance
-    const doc = new jsPDF();
 
-    // Convert HTML content to image using html2canvas
-    html2canvas(htmlContent).then(canvas => {
-      // Add the image to the PDF document
-      doc.addImage(canvas.toDataURL(), 'PNG', 15, 15, 1000, 700);
-      // Save the PDF file
-      doc.save('diagram.pdf');
-    });
+function downloadImage(dataUrl) {
+  const a = document.createElement('a');
+
+  a.setAttribute('download', 'reactflow.png');
+  a.setAttribute('href', dataUrl);
+  a.click();
+}
+
+const imageWidth = 10240;
+const imageHeight = 7680;
+
+function DownloadButton() {
+  const { getNodes } = useReactFlow();
+  const onClick = () => {
+    // we calculate a transform for the nodes so that all nodes are visible
+    // we then overwrite the transform of the `.react-flow__viewport` element
+    // with the style option of the html-to-image library
+    const nodesBounds = getRectOfNodes(getNodes());
+    const transform = getTransformForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2);
+
+    toPng(document.querySelector('.react-flow__viewport'), {
+      backgroundColor: '#1a365d',
+      width: imageWidth,
+      height: imageHeight,
+      style: {
+        width: imageWidth,
+        height: imageHeight,
+        transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
+      },
+    }).then(downloadImage);
   };
 
   return (
-    <div>
-      <div id="diagram">Your diagram content goes here</div>
-      <button onClick={generatePDF}>Generate PDF</button>
-    </div>
+    <Panel position="top-right">
+      <button className="download-btn" onClick={onClick}>
+        Download Image
+      </button>
+    </Panel>
   );
 }
 
-export default Schematics;
+export default DownloadButton;
