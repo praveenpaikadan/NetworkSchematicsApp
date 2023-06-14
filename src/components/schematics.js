@@ -12,6 +12,12 @@ import ReactFlow, {
 
 import 'reactflow/dist/style.css';
 import DownloadButton from './download';
+import EditBox from './edit-box';
+import ColorSelectorNode from './custom-node';
+
+const nodeTypes = {
+    selectorNode: ColorSelectorNode,
+  };
 
 var dagre = require("dagre");
 var g = new dagre.graphlib.Graph();
@@ -62,6 +68,9 @@ const processData = (raw_data) => {
 
     data.nodes = removeDuplicatesById(data.nodes)
 
+    const onChange = () => {}
+
+/*
     const xmax = data.nodes.reduce((prev, current) => {
         return (prev.position.x > current.position.x) ? prev : current;
     }).position.x;
@@ -81,12 +90,13 @@ const processData = (raw_data) => {
     var range = {xmax, xmin, ymax, ymin}
 
     console.log(range)
-
+*/
     var initialNodes = data.nodes.map(item => {
-        item.data = {label: item.id}; 
-        item.position.x = (item.position.x-xmin)/(xmax-xmin) * 1000 + 50;
-        item.position.y = (item.position.y-ymin)/(ymax-ymin) * 700  + 50;
-        item.deletable = true
+        item.type = 'selectorNode'
+        item.data = {id: item.id, label: item.id, "Node ID": item.node_id }  // all editable item should go to data. All things that should not be shown in node needs to be addressed in node 
+        item.style = { border: '1px solid #777', padding: 10 }
+        //item.position.x = (item.position.x-xmin)/(xmax-xmin) * 1000 + 50;
+        //item.position.y = (item.position.y-ymin)/(ymax-ymin) * 700  + 50;
         item.sourcePosition = 'right'
         item.targetPosition = 'left'
         return item;
@@ -102,6 +112,8 @@ const processData = (raw_data) => {
         item.animated = true
         return item
     })
+
+// DATA AUGMENTATION
 
     // remove outfalls
     initialNodes = initialNodes.filter(item => (!item.id.includes("outfall")))
@@ -179,17 +191,13 @@ const processData = (raw_data) => {
     }
     */
 
+
+// ==== DATA AUGMENTATION ENDS =======
+
     // degre implementation
     initialNodes.forEach(item => g.setNode(item.id,    { label: item.id,  width: 100, height: 200 }))
     initialEdges.forEach(item => g.setEdge(item.source, item.target))
     dagre.layout(g);
-    g.nodes().forEach(function(v) {
-        console.log("Node " + v + ": " + JSON.stringify(g.node(v)));
-    });
-
-    g.edges().forEach(function(e) {
-        console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(g.edge(e)));
-    });
 
     initialNodes = initialNodes.map(item => {
         item.position.y = g.node(item.id)["x"]
@@ -201,29 +209,37 @@ const processData = (raw_data) => {
     return [initialNodes, initialEdges]
 }
 
-
 export default function Schemtics() {
 
     const [raw_data, setRawData] = useState(null)
 
     const [initialNodes, initialEdges] = processData(raw_data)
 
-    console.log(initialNodes, initialEdges)
+    const [activeNodeID ,setActiveNodeID] = useState(null)
+
+    // console.log(initialNodes, initialEdges)
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
     useEffect(() => {
+        setActiveNodeID(null)
       setNodes(initialNodes)
       setEdges(initialEdges)
     }, [raw_data])
-    
 
     const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
     const onLoad = (reactFlowInstance) => {
         reactFlowInstance.fitView();
     };
+
+    const changeData = (id, key, value) => {
+        var oldNodes = [...nodes]
+        oldNodes[oldNodes.findIndex(item => item.id === id)]["data"][key] = value;
+        setNodes(oldNodes)
+        console.log(id, key, value)
+    }
 
     return (
         <div>
@@ -233,15 +249,19 @@ export default function Schemtics() {
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
+                    nodeTypes={nodeTypes}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     //onConnect={onConnect}
-                    
+                    onNodeClick={(e, node) => {setActiveNodeID(node.id)}} 
+                     
                 >
                     <Controls />
                     <MiniMap />
                     <Background variant="dots" gap={12} size={1} />
+                    <EditBox data={activeNodeID ? nodes.find(item => item.id === activeNodeID)["data"] : {}} changeData={changeData}/>
                     <DownloadButton />
+                    
                 </ReactFlow>
                 </ReactFlowProvider>
             </div>
